@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4F46E5">
+    <title>Field Work Tracker</title>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+            min-height: 100vh;
+            padding: 16px;
+        }
+        
+        .container { max-width: 800px; margin: 0 auto; }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #1F2937;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        h2 {
+            font-size: 20px;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+        
+        h3 {
+            font-size: 16px;
+            color: #4B5563;
+            margin-bottom: 8px;
+        }
+        
+        .btn {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-primary { background: #4F46E5; color: white; }
+        .btn-primary:hover { background: #4338CA; }
+        
+        .btn-success { background: #10B981; color: white; }
+        .btn-success:hover { background: #059669; }
+        
+        .btn-warning { background: #F59E0B; color: white; }
+        .btn-warning:hover { background: #D97706; }
+        
+        .btn-danger { background: #EF4444; color: white; }
+        .btn-danger:hover { background: #DC2626; }
+        
+        .btn-secondary { background: #6B7280; color: white; }
+        .btn-secondary:hover { background: #4B5563; }
+        
+        .btn-teal { background: #14B8A6; color: white; }
+        .btn-teal:hover { background: #0D9488; }
+        
+        .grid { display: grid; gap: 12px; }
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        
+        .status-card {
+            background: #EEF2FF;
+            border: 2px solid #C7D2FE;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .status-card.warning {
+            background: #FEF3C7;
+            border-color: #FDE047;
+        }
+        
+        .status-label {
+            font-size: 14px;
+            color: #6B7280;
+            margin-bottom: 4px;
+        }
+        
+        .status-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4F46E5;
+        }
+        
+        .toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .toggle-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .toggle-btn.on { background: #10B981; color: white; }
+        .toggle-btn.off { background: #D1D5DB; color: #4B5563; }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #374151;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        textarea { min-height: 80px; resize: vertical; }
+        
+        .job-item {
+            background: #F9FAFB;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        
+        .job-title { font-weight: 700; color: #1F2937; }
+        .job-subtitle { font-size: 14px; color: #6B7280; }
+        
+        .time-badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        .time-badge.drive { background: #DBEAFE; color: #1E40AF; }
+        .time-badge.work { background: #D1FAE5; color: #065F46; }
+        
+        .install-prompt {
+            background: #F0FDF4;
+            border: 2px solid #86EFAC;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .hidden { display: none; }
+        
+        .todo-list {
+            margin-top: 12px;
+        }
+        
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #F9FAFB;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+        
+        .todo-item.completed {
+            opacity: 0.6;
+        }
+        
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #9CA3AF;
+        }
+        
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .todo-text {
+            flex: 1;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .todo-delete {
+            background: #EF4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .add-todo-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .add-todo-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .add-todo-btn {
+            padding: 8px 16px;
+            background: #10B981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 640px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Install Prompt -->
+        <div id="installPrompt" class="install-prompt hidden">
+            <h3>📱 Install App</h3>
+            <p style="margin: 8px 0;">Add this to your home screen for better GPS access and offline use!</p>
+            <div class="grid grid-2">
+                <button class="btn btn-success" onclick="installApp()">Install</button>
+                <button class="btn btn-secondary" onclick="dismissInstall()">Not Now</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h1>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 7h-9M14 17H5M16 3v4M8 13v4"/>
+                    <circle cx="12" cy="12" r="9"/>
+                </svg>
+                Field Work Tracker
+            </h1>
+            
+            <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                <button class="btn btn-primary" onclick="toggleView('main')" id="mainViewBtn">Track</button>
+                <button class="btn btn-secondary" onclick="toggleView('reports')" id="reportsViewBtn">Reports</button>
+            </div>
+
+            <!-- Main Tracking View -->
+            <div id="mainView">
+                <!-- Auto Detect Toggle -->
+                <div class="status-card warning" style="margin-bottom: 16px;">
+                    <div class="toggle">
+                        <div>
+                            <div class="status-label">🗺️ Auto-Detect Driving</div>
+                            <div style="font-size: 12px; color: #78716C; margin-top: 4px;" id="locationStatus">
+                                Click ON to enable GPS tracking
+                            </div>
+                        </div>
+                        <button class="toggle-btn off" id="autoDetectBtn" onclick="toggleAutoDetect()">OFF</button>
+                    </div>
+                </div>
+
+                <!-- Current Status -->
+                <div class="status-card" style="margin-bottom: 16px;">
+                    <div class="status-label">⏱️ Current Status</div>
+                    <div class="status-value" id="currentStatus">Ready to start</div>
+                    <div id="currentJobInfo" style="margin-top: 8px; font-size: 14px; color: #6B7280;"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-2" id="actionButtons">
+                    <button class="btn btn-primary" onclick="headedToJob()">
+                        📍 Headed to Job
+                    </button>
+                    <button class="btn btn-teal" onclick="showExpenseForm()">
+                        💰 Add Expense
+                    </button>
+                </div>
+
+                <!-- Today's Jobs -->
+                <div style="margin-top: 24px;">
+                    <h2>📅 Today's Jobs</h2>
+                    <div id="todayJobs">
+                        <p style="text-align: center; color: #9CA3AF; padding: 20px;">No jobs recorded today</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports View -->
+            <div id="reportsView" class="hidden">
+                <div class="grid grid-2" style="margin-bottom: 16px;">
+                    <button class="btn btn-primary" id="dailyBtn" onclick="setReportType('daily')">Daily</button>
+                    <button class="btn btn-secondary" id="weeklyBtn" onclick="setReportType('weekly')">Weekly</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Date</label>
+                    <input type="date" id="reportDate" onchange="updateReport()">
+                    <div id="weekRange" style="font-size: 12px; color: #6B7280; margin-top: 4px;"></div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-2" style="margin-bottom: 16px;">
+                    <div class="status-card">
+                        <div class="status-label">🚗 Drive Time</div>
+                        <div class="status-value" style="color: #2563EB;" id="totalDrive">0h 0m</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">⚙️ Work Time</div>
+                        <div class="status-value" style="color: #10B981;" id="totalWork">0h 0m</div>
+                    </div>
+                </div>
+                <div class="status-card" style="margin-bottom: 16px;">
+                    <div class="status-label">💵 Total Expenses</div>
+                    <div class="status-value" style="color: #7C3AED;" id="totalExpenses">$0.00</div>
+                </div>
+
+                <!-- Report Jobs -->
+                <h3>Jobs</h3>
+                <div id="reportJobs"></div>
+
+                <!-- Report Expenses -->
+                <h3 style="margin-top: 16px;">Expenses</h3>
+                <div id="reportExpenses"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Form Modal -->
+    <div id="jobModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 16px;">New Job Details</h2>
+            <form id="jobForm" onsubmit="submitJob(event)">
+                <div class="form-group">
+                    <label>Customer Name *</label>
+                    <input type="text" id="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label>Contact</label>
+                    <input type="text" id="contact">
+                </div>
+                <div class="form-group">
+                    <label>Facility *</label>
+                    <input type="text" id="facility" required>
+                </div>
+                <div class="form-group">
+                    <label>Work Scope *</label>
+                    <textarea id="workScope" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Initial To-Do List</label>
+                    <div id="initialTodoList">
+                        <div id="initialTodos"></div>
+                        <div class="add-todo-form">
+                            <input type="text" id="newTodoInput" class="add-todo-input" placeholder="Add a task...">
+                            <button type="button" class="add-todo-btn" onclick="addInitialTodo()">+ Add</button>
+                        </div>
+                    </div>
+                    <p style="font-size: 12px; color: #6B7280; margin-top: 4px;">You can add more tasks while working</p>
+                </div>
+                <div class="form-group">
+                    <label>Tasks Completed</label>
+                    <textarea id="tasksCompleted" placeholder="You can update this later"></textarea>
+                </div>
+                <div class="grid grid-2">
+                    <button type="submit" class="btn btn-primary">Start Job</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeJobModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Expense Form Modal -->
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 16px;">Add Expense</h2>
+            <form id="expenseForm" onsubmit="submitExpense(event)">
+                <div class="form-group">
+                    <label>Description *</label>
+                    <input type="text" id="expenseDesc" required placeholder="e.g., Gas for job site travel">
+                </div>
+                <div class="form-group">
+                    <label>Amount *</label>
+                    <input type="number" step="0.01" id="expenseAmount" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="expenseCategory">
+                        <option value="fuel">Fuel</option>
+                        <option value="meals">Meals</option>
+                        <option value="tolls">Tolls/Parking</option>
+                        <option value="materials">Materials</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Receipt (Photo)</label>
+                    <input type="file" accept="image/*" id="expenseReceipt" onchange="handleReceiptUpload(event)">
+                    <div id="receiptPreview" style="margin-top: 8px;"></div>
+                </div>
+                <div class="grid grid-2">
+                    <button type="submit" class="btn btn-teal">Add Expense</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- To-Do List Modal -->
+    <div id="todoModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 16px;">📋 Job Tasks</h2>
+            <div style="background: #F3F4F6; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                <div style="font-weight: 600; color: #374151;"id="todoJobName"></div>
+                <div style="font-size: 14px; color: #6B7280;" id="todoJobFacility"></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Tasks</label>
+                <div id="activeTodoList"></div>
+                <div class="add-todo-form">
+                    <input type="text" id="activeTodoInput" class="add-todo-input" placeholder="Add a new task...">
+                    <button type="button" class="add-todo-btn" onclick="addActiveTodo()">+ Add</button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #E5E7EB;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-weight: 600; color: #374151;">Progress:</span>
+                    <span id="todoProgress" style="font-weight: 600; color: #10B981;">0/0 completed</span>
+                </div>
+                <div style="background: #E5E7EB; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div id="todoProgressBar" style="background: #10B981; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                </div>
+            </div>
+            
+            <button type="button" class="btn btn-primary" style="margin-top: 16px;" onclick="closeTodoModal()">Done</button>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let state = {
+            currentState: 'idle', // idle, heading, onsite, left
+            currentJob: null,
+            jobs: [],
+            expenses: [],
+            autoDetectEnabled: false,
+            lastPosition: null,
+            drivingDistance: 0,
+            watchId: null,
+            reportType: 'daily'
+        };
+
+        let deferredPrompt = null;
+        let receiptData = null;
+        let initialTodos = []; // Temporary storage for todos being added in the job form
+
+        // Initialize app
+        function init() {
+            loadData();
+            updateUI();
+            document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+            
+            // PWA install prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('installPrompt').classList.remove('hidden');
+            });
+        }
+
+        // Storage functions
+        function saveData() {
+            try {
+                localStorage.setItem('fieldTracker', JSON.stringify({
+                    currentState: state.currentState,
+                    currentJob: state.currentJob,
+                    jobs: state.jobs,
+                    expenses: state.expenses
+                }));
+            } catch (e) {
+                console.error('Error saving data:', e);
+            }
+        }
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem('fieldTracker');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.currentState = data.currentState || 'idle';
+                    state.currentJob = data.currentJob || null;
+                    state.jobs = data.jobs || [];
+                    state.expenses = data.expenses || [];
+                }
+            } catch (e) {
+                console.error('Error loading data:', e);
+            }
+        }
+
+        // GPS Auto-detect
+        function toggleAutoDetect() {
+            state.autoDetectEnabled = !state.autoDetectEnabled;
+            const btn = document.getElementById('autoDetectBtn');
+            
+            if (state.autoDetectEnabled) {
+                btn.textContent = 'ON';
+                btn.classList.remove('off');
+                btn.classList.add('on');
+                startGPSTracking();
+            } else {
+                btn.textContent = 'OFF';
+                btn.classList.remove('on');
+                btn.classList.add('off');
+                stopGPSTracking();
+            }
+        }
+
+        function startGPSTracking() {
+            if (!navigator.geolocation) {
+                document.getElementById('locationStatus').textContent = '❌ GPS not supported';
+                return;
+            }
+
+            document.getElementById('locationStatus').textContent = '📡 Requesting GPS access...';
+            
+            state.watchId = navigator.geolocation.watchPosition(
+                handlePositionUpdate,
+                handlePositionError,
+                { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+            );
+        }
+
+        function stopGPSTracking() {
+            if (state.watchId) {
+                navigator.geolocation.clearWatch(state.watchId);
+                state.watchId = null;
+            }
+            state.lastPosition = null;
+            state.drivingDistance = 0;
+            document.getElementById('locationStatus').textContent = 'Click ON to enable GPS tracking';
+        }
+
+        function handlePositionUpdate(position) {
+            document.getElementById('locationStatus').textContent = '✅ GPS tracking active';
+            
+            const currentPos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                speed: position.coords.speed,
+                timestamp: position.timestamp
+            };
+
+            if (!state.lastPosition) {
+                state.lastPosition = currentPos;
+                return;
+            }
+
+            const distance = calculateDistance(
+                state.lastPosition.lat, state.lastPosition.lng,
+                currentPos.lat, currentPos.lng
+            );
+
+            const timeDiff = (currentPos.timestamp - state.lastPosition.timestamp) / 1000;
+            const speedMph = currentPos.speed !== null 
+                ? currentPos.speed * 2.237 
+                : (distance / timeDiff) * 3600;
+
+            if (speedMph > 15) {
+                state.drivingDistance += distance;
+                if (state.currentState === 'heading' && state.drivingDistance > 0.25) {
+                    document.getElementById('locationStatus').textContent = 
+                        `🚗 Driving: ${Math.round(speedMph)} mph (${state.drivingDistance.toFixed(2)} mi)`;
+                }
+            } else {
+                if (state.currentState === 'heading' && state.drivingDistance > 0.25) {
+                    document.getElementById('locationStatus').textContent = '✅ Auto-arrived at site!';
+                    arrivedOnsite();
+                    state.drivingDistance = 0;
+                } else {
+                    document.getElementById('locationStatus').textContent = 
+                        `📍 Stationary (${Math.round(speedMph)} mph)`;
+                    state.drivingDistance = 0;
+                }
+            }
+
+            state.lastPosition = currentPos;
+        }
+
+        function handlePositionError(error) {
+            document.getElementById('locationStatus').textContent = 
+                `❌ GPS error: ${error.message}`;
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 3959; // Earth's radius in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                     Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Job workflow
+        function headedToJob() {
+            document.getElementById('jobModal').classList.add('show');
+        }
+
+        function submitJob(e) {
+            e.preventDefault();
+            
+            const job = {
+                id: Date.now().toString(),
+                customerName: document.getElementById('customerName').value,
+                contact: document.getElementById('contact').value,
+                facility: document.getElementById('facility').value,
+                workScope: document.getElementById('workScope').value,
+                tasksCompleted: document.getElementById('tasksCompleted').value,
+                headedTime: new Date().toISOString(),
+                arrivedTime: null,
+                leftTime: null,
+                driveTime: 0,
+                workTime: 0,
+                date: new Date().toISOString().split('T')[0],
+                todos: initialTodos.map((text, index) => ({
+                    id: `todo-${Date.now()}-${index}`,
+                    text: text,
+                    completed: false
+                }))
+            };
+
+            state.currentJob = job;
+            state.currentState = 'heading';
+            state.jobs.push(job);
+            state.drivingDistance = 0;
+            
+            saveData();
+            closeJobModal();
+            updateUI();
+        }
+
+        function arrivedOnsite() {
+            if (state.currentJob && state.currentState === 'heading') {
+                const arrivedTime = new Date().toISOString();
+                const driveTime = (new Date(arrivedTime) - new Date(state.currentJob.headedTime)) / 1000 / 60;
+                
+                state.currentJob.arrivedTime = arrivedTime;
+                state.currentJob.driveTime = Math.round(driveTime);
+                state.currentState = 'onsite';
+                state.drivingDistance = 0;
+                
+                const jobIndex = state.jobs.findIndex(j => j.id === state.currentJob.id);
+                if (jobIndex !== -1) state.jobs[jobIndex] = state.currentJob;
+                
+                saveData();
+                updateUI();
+            }
+        }
+
+        function leftSite() {
+            if (state.currentJob && state.currentState === 'onsite') {
+                const leftTime = new Date().toISOString();
+                const workTime = (new Date(leftTime) - new Date(state.currentJob.arrivedTime)) / 1000 / 60;
+                
+                state.currentJob.leftTime = leftTime;
+                state.currentJob.workTime = Math.round(workTime);
+                state.currentState = 'left';
+                
+                const jobIndex = state.jobs.findIndex(j => j.id === state.currentJob.id);
+                if (jobIndex !== -1) state.jobs[jobIndex] = state.currentJob;
+                
+                saveData();
+                updateUI();
+            }
+        }
+
+        function anotherJob() {
+            state.currentState = 'idle';
+            state.currentJob = null;
+            saveData();
+            headedToJob();
+        }
+
+        function concludeDay() {
+            state.currentState = 'idle';
+            state.currentJob = null;
+            saveData();
+            updateUI();
+        }
+
+        // Expense functions
+        function showExpenseForm() {
+            document.getElementById('expenseModal').classList.add('show');
+        }
+
+        function handleReceiptUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    receiptData = {
+                        data: event.target.result,
+                        name: file.name
+                    };
+                    document.getElementById('receiptPreview').innerHTML = 
+                        `<p style="color: #10B981;">✓ ${file.name}</p>`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function submitExpense(e) {
+            e.preventDefault();
+            
+            const expense = {
+                id: Date.now().toString(),
+                description: document.getElementById('expenseDesc').value,
+                amount: document.getElementById('expenseAmount').value,
+                category: document.getElementById('expenseCategory').value,
+                receipt: receiptData,
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            state.expenses.push(expense);
+            saveData();
+            closeExpenseModal();
+            updateUI();
+        }
+
+        // UI Updates
+        function updateUI() {
+            updateStatus();
+            updateActionButtons();
+            updateTodayJobs();
+        }
+
+        function updateStatus() {
+            const statusEl = document.getElementById('currentStatus');
+            const infoEl = document.getElementById('currentJobInfo');
+            
+            if (state.currentState === 'idle') {
+                statusEl.textContent = 'Ready to start';
+                infoEl.innerHTML = '';
+            } else if (state.currentState === 'heading') {
+                statusEl.textContent = `Heading to ${state.currentJob.customerName}`;
+                infoEl.innerHTML = `<strong>Facility:</strong> ${state.currentJob.facility}`;
+            } else if (state.currentState === 'onsite') {
+                statusEl.textContent = `On-site at ${state.currentJob.customerName}`;
+                infoEl.innerHTML = `<strong>Facility:</strong> ${state.currentJob.facility}`;
+            } else if (state.currentState === 'left') {
+                statusEl.textContent = 'Left site - Next action?';
+                infoEl.innerHTML = '';
+            }
+        }
+
+        function updateActionButtons() {
+            const buttonsHtml = [];
+            
+            if (state.currentState === 'idle') {
+                buttonsHtml.push('<button class="btn btn-primary" onclick="headedToJob()">📍 Headed to Job</button>');
+            } else if (state.currentState === 'heading') {
+                buttonsHtml.push('<button class="btn btn-success" onclick="arrivedOnsite()">✅ Arrived Onsite' + 
+                    (state.autoDetectEnabled ? ' (Manual)' : '') + '</button>');
+                buttonsHtml.push('<button class="btn btn-secondary" onclick="showTodoModal()">📋 Manage Tasks</button>');
+            } else if (state.currentState === 'onsite') {
+                buttonsHtml.push('<button class="btn btn-warning" onclick="leftSite()">🚪 Left Site</button>');
+                buttonsHtml.push('<button class="btn btn-primary" onclick="showTodoModal()">📋 Manage Tasks</button>');
+            } else if (state.currentState === 'left') {
+                buttonsHtml.push('<button class="btn btn-primary" onclick="anotherJob()">📍 Another Job</button>');
+                buttonsHtml.push('<button class="btn btn-secondary" onclick="concludeDay()">🏁 Conclude Day</button>');
+            }
+            
+            buttonsHtml.push('<button class="btn btn-teal" onclick="showExpenseForm()">💰 Add Expense</button>');
+            
+            document.getElementById('actionButtons').innerHTML = buttonsHtml.join('');
+        }
+
+        function updateTodayJobs() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayJobs = state.jobs.filter(j => j.date === today);
+            
+            if (todayJobs.length === 0) {
+                document.getElementById('todayJobs').innerHTML = 
+                    '<p style="text-align: center; color: #9CA3AF; padding: 20px;">No jobs recorded today</p>';
+                return;
+            }
+            
+            const jobsHtml = todayJobs.map(job => {
+                const todos = job.todos || [];
+                const completedTodos = todos.filter(t => t.completed).length;
+                const totalTodos = todos.length;
+                
+                return `
+                <div class="job-item">
+                    <div class="job-header">
+                        <div>
+                            <div class="job-title">${job.customerName}</div>
+                            <div class="job-subtitle">${job.facility}</div>
+                            ${totalTodos > 0 ? `<div style="font-size: 12px; color: #10B981; margin-top: 2px;">✓ ${completedTodos}/${totalTodos} tasks done</div>` : ''}
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="time-badge drive">🚗 ${formatTime(job.driveTime)}</div>
+                            <div class="time-badge work" style="margin-top: 4px;">⚙️ ${formatTime(job.workTime)}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: #6B7280; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                        <div>Headed: ${formatDateTime(job.headedTime)}</div>
+                        <div>Arrived: ${formatDateTime(job.arrivedTime)}</div>
+                        <div>Left: ${formatDateTime(job.leftTime)}</div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            document.getElementById('todayJobs').innerHTML = jobsHtml;
+        }
+
+        // Reports
+        function toggleView(view) {
+            if (view === 'main') {
+                document.getElementById('mainView').classList.remove('hidden');
+                document.getElementById('reportsView').classList.add('hidden');
+                document.getElementById('mainViewBtn').classList.remove('btn-secondary');
+                document.getElementById('mainViewBtn').classList.add('btn-primary');
+                document.getElementById('reportsViewBtn').classList.remove('btn-primary');
+                document.getElementById('reportsViewBtn').classList.add('btn-secondary');
+            } else {
+                document.getElementById('mainView').classList.add('hidden');
+                document.getElementById('reportsView').classList.remove('hidden');
+                document.getElementById('mainViewBtn').classList.remove('btn-primary');
+                document.getElementById('mainViewBtn').classList.add('btn-secondary');
+                document.getElementById('reportsViewBtn').classList.remove('btn-secondary');
+                document.getElementById('reportsViewBtn').classList.add('btn-primary');
+                updateReport();
+            }
+        }
+
+        function setReportType(type) {
+            state.reportType = type;
+            document.getElementById('dailyBtn').classList.toggle('btn-primary', type === 'daily');
+            document.getElementById('dailyBtn').classList.toggle('btn-secondary', type !== 'daily');
+            document.getElementById('weeklyBtn').classList.toggle('btn-primary', type === 'weekly');
+            document.getElementById('weeklyBtn').classList.toggle('btn-secondary', type !== 'weekly');
+            updateReport();
+        }
+
+        function updateReport() {
+            const date = document.getElementById('reportDate').value;
+            let jobs, expenses;
+            
+            if (state.reportType === 'daily') {
+                jobs = state.jobs.filter(j => j.date === date);
+                expenses = state.expenses.filter(e => e.date === date);
+                document.getElementById('weekRange').textContent = '';
+            } else {
+                const range = getWeekRange(date);
+                jobs = state.jobs.filter(j => j.date >= range.start && j.date <= range.end);
+                expenses = state.expenses.filter(e => e.date >= range.start && e.date <= range.end);
+                document.getElementById('weekRange').textContent = 
+                    `Week: ${new Date(range.start).toLocaleDateString()} - ${new Date(range.end).toLocaleDateString()}`;
+            }
+            
+            // Calculate totals
+            const totalDrive = jobs.reduce((sum, j) => sum + (j.driveTime || 0), 0);
+            const totalWork = jobs.reduce((sum, j) => sum + (j.workTime || 0), 0);
+            const totalExp = expenses.reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+            
+            document.getElementById('totalDrive').textContent = formatTime(totalDrive);
+            document.getElementById('totalWork').textContent = formatTime(totalWork);
+            document.getElementById('totalExpenses').textContent = `$${totalExp.toFixed(2)}`;
+            
+            // Display jobs
+            if (jobs.length === 0) {
+                document.getElementById('reportJobs').innerHTML = 
+                    '<p style="text-align: center; color: #9CA3AF; padding: 12px;">No jobs for this period</p>';
+            } else {
+                document.getElementById('reportJobs').innerHTML = jobs.map(job => {
+                    const todos = job.todos || [];
+                    const completedTodos = todos.filter(t => t.completed).length;
+                    const totalTodos = todos.length;
+                    
+                    return `
+                    <div class="job-item">
+                        <div class="job-header">
+                            <div>
+                                <div class="job-title">${job.customerName}</div>
+                                <div class="job-subtitle">${job.facility}</div>
+                                <div style="font-size: 12px; color: #9CA3AF;">${job.date}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="time-badge drive">🚗 ${formatTime(job.driveTime)}</div>
+                                <div class="time-badge work" style="margin-top: 4px;">⚙️ ${formatTime(job.workTime)}</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #E5E7EB; font-size: 14px;">
+                            <p><strong>Contact:</strong> ${job.contact || 'N/A'}</p>
+                            <p><strong>Work Scope:</strong> ${job.workScope}</p>
+                            ${job.tasksCompleted ? `<p><strong>Tasks:</strong> ${job.tasksCompleted}</p>` : ''}
+                            ${totalTodos > 0 ? `
+                                <div style="margin-top: 8px; padding: 8px; background: #F9FAFB; border-radius: 6px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px;">📋 Tasks (${completedTodos}/${totalTodos} completed)</div>
+                                    ${todos.map(todo => `
+                                        <div style="font-size: 13px; padding: 4px 0; color: ${todo.completed ? '#9CA3AF' : '#374151'};">
+                                            ${todo.completed ? '✅' : '⬜'} ${todo.completed ? '<s>' + todo.text + '</s>' : todo.text}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    `;
+                }).join('');
+            }
+            
+            // Display expenses
+            if (expenses.length === 0) {
+                document.getElementById('reportExpenses').innerHTML = 
+                    '<p style="text-align: center; color: #9CA3AF; padding: 12px;">No expenses for this period</p>';
+            } else {
+                document.getElementById('reportExpenses').innerHTML = expenses.map(exp => `
+                    <div class="job-item">
+                        <div class="job-header">
+                            <div>
+                                <div class="job-title">${exp.description}</div>
+                                <div class="job-subtitle">${exp.category}</div>
+                                <div style="font-size: 12px; color: #9CA3AF;">${exp.date}</div>
+                            </div>
+                            <div class="job-title" style="color: #7C3AED;">$${parseFloat(exp.amount).toFixed(2)}</div>
+                        </div>
+                        ${exp.receipt ? `
+                            <div style="margin-top: 8px;">
+                                <img src="${exp.receipt.data}" alt="Receipt" style="max-width: 100%; height: auto; max-height: 200px; border-radius: 6px;">
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function getWeekRange(dateStr) {
+            const date = new Date(dateStr);
+            const day = date.getDay();
+            const diff = date.getDate() - day;
+            const sunday = new Date(date.setDate(diff));
+            const saturday = new Date(sunday);
+            saturday.setDate(saturday.getDate() + 6);
+            return {
+                start: sunday.toISOString().split('T')[0],
+                end: saturday.toISOString().split('T')[0]
+            };
+        }
+
+        // Utility functions
+        function formatTime(minutes) {
+            const hrs = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hrs}h ${mins}m`;
+        }
+
+        function formatDateTime(isoString) {
+            if (!isoString) return '--:--';
+            return new Date(isoString).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        // Modal functions
+        function closeJobModal() {
+            document.getElementById('jobModal').classList.remove('show');
+            document.getElementById('jobForm').reset();
+            initialTodos = [];
+            renderInitialTodos();
+        }
+
+        function closeExpenseModal() {
+            document.getElementById('expenseModal').classList.remove('show');
+            document.getElementById('expenseForm').reset();
+            receiptData = null;
+            document.getElementById('receiptPreview').innerHTML = '';
+        }
+
+        function closeTodoModal() {
+            document.getElementById('todoModal').classList.remove('show');
+        }
+
+        // To-Do List Functions - Initial (in job form)
+        function addInitialTodo() {
+            const input = document.getElementById('newTodoInput');
+            const text = input.value.trim();
+            
+            if (text) {
+                initialTodos.push(text);
+                input.value = '';
+                renderInitialTodos();
+            }
+        }
+
+        function renderInitialTodos() {
+            const container = document.getElementById('initialTodos');
+            if (initialTodos.length === 0) {
+                container.innerHTML = '<p style="font-size: 12px; color: #9CA3AF; padding: 8px;">No tasks added yet</p>';
+                return;
+            }
+
+            container.innerHTML = initialTodos.map((todo, index) => `
+                <div class="todo-item">
+                    <span class="todo-text">${todo}</span>
+                    <button type="button" class="todo-delete" onclick="removeInitialTodo(${index})">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function removeInitialTodo(index) {
+            initialTodos.splice(index, 1);
+            renderInitialTodos();
+        }
+
+        // To-Do List Functions - Active Job
+        function showTodoModal() {
+            if (!state.currentJob) return;
+
+            document.getElementById('todoJobName').textContent = state.currentJob.customerName;
+            document.getElementById('todoJobFacility').textContent = state.currentJob.facility;
+            document.getElementById('activeTodoInput').value = '';
+            
+            renderActiveTodos();
+            document.getElementById('todoModal').classList.add('show');
+        }
+
+        function renderActiveTodos() {
+            if (!state.currentJob || !state.currentJob.todos) {
+                state.currentJob.todos = [];
+            }
+
+            const container = document.getElementById('activeTodoList');
+            const todos = state.currentJob.todos;
+
+            if (todos.length === 0) {
+                container.innerHTML = '<p style="font-size: 12px; color: #9CA3AF; padding: 8px;">No tasks yet - add one below!</p>';
+                updateTodoProgress();
+                return;
+            }
+
+            container.innerHTML = todos.map(todo => `
+                <div class="todo-item ${todo.completed ? 'completed' : ''}">
+                    <input type="checkbox" 
+                           class="todo-checkbox" 
+                           ${todo.completed ? 'checked' : ''} 
+                           onchange="toggleTodo('${todo.id}')">
+                    <span class="todo-text">${todo.text}</span>
+                    <button type="button" class="todo-delete" onclick="deleteTodo('${todo.id}')">✕</button>
+                </div>
+            `).join('');
+
+            updateTodoProgress();
+        }
+
+        function addActiveTodo() {
+            const input = document.getElementById('activeTodoInput');
+            const text = input.value.trim();
+            
+            if (text && state.currentJob) {
+                if (!state.currentJob.todos) {
+                    state.currentJob.todos = [];
+                }
+
+                const newTodo = {
+                    id: `todo-${Date.now()}`,
+                    text: text,
+                    completed: false
+                };
+
+                state.currentJob.todos.push(newTodo);
+                
+                // Update the job in the jobs array
+                const jobIndex = state.jobs.findIndex(j => j.id === state.currentJob.id);
+                if (jobIndex !== -1) {
+                    state.jobs[jobIndex] = state.currentJob;
+                }
+
+                input.value = '';
+                saveData();
+                renderActiveTodos();
+            }
+        }
+
+        function toggleTodo(todoId) {
+            if (!state.currentJob || !state.currentJob.todos) return;
+
+            const todo = state.currentJob.todos.find(t => t.id === todoId);
+            if (todo) {
+                todo.completed = !todo.completed;
+
+                // Update the job in the jobs array
+                const jobIndex = state.jobs.findIndex(j => j.id === state.currentJob.id);
+                if (jobIndex !== -1) {
+                    state.jobs[jobIndex] = state.currentJob;
+                }
+
+                saveData();
+                renderActiveTodos();
+            }
+        }
+
+        function deleteTodo(todoId) {
+            if (!state.currentJob || !state.currentJob.todos) return;
+
+            state.currentJob.todos = state.currentJob.todos.filter(t => t.id !== todoId);
+
+            // Update the job in the jobs array
+            const jobIndex = state.jobs.findIndex(j => j.id === state.currentJob.id);
+            if (jobIndex !== -1) {
+                state.jobs[jobIndex] = state.currentJob;
+            }
+
+            saveData();
+            renderActiveTodos();
+        }
+
+        function updateTodoProgress() {
+            if (!state.currentJob || !state.currentJob.todos) {
+                document.getElementById('todoProgress').textContent = '0/0 completed';
+                document.getElementById('todoProgressBar').style.width = '0%';
+                return;
+            }
+
+            const todos = state.currentJob.todos;
+            const completed = todos.filter(t => t.completed).length;
+            const total = todos.length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('todoProgress').textContent = `${completed}/${total} completed`;
+            document.getElementById('todoProgressBar').style.width = `${percentage}%`;
+        }
+
+        // Allow Enter key to add todos
+        document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    if (document.getElementById('newTodoInput') === document.activeElement) {
+                        e.preventDefault();
+                        addInitialTodo();
+                    } else if (document.getElementById('activeTodoInput') === document.activeElement) {
+                        e.preventDefault();
+                        addActiveTodo();
+                    }
+                }
+            });
+        });
+
+        // PWA install
+        async function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            }
+            dismissInstall();
+        }
+
+        function dismissInstall() {
+            document.getElementById('installPrompt').classList.add('hidden');
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(
+                'data:text/javascript;base64,' + btoa(`
+                    const CACHE = 'field-tracker-v1';
+                    self.addEventListener('install', e => {
+                        e.waitUntil(caches.open(CACHE).then(cache => 
+                            cache.addAll(['/'])
+                        ));
+                    });
+                    self.addEventListener('fetch', e => {
+                        e.respondWith(
+                            caches.match(e.request).then(r => r || fetch(e.request))
+                        );
+                    });
+                `)
+            ).catch(err => console.log('SW registration failed'));
+        }
+
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
